@@ -86,6 +86,14 @@ Provide details about the dataset here (source, format, size, preprocessing step
 
 ---
 
+## How to set-up GitHub Desktop
+
+Follow these tutorials, I recommend the second link.
+https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/setting-up-github-desktop
+https://www.youtube.com/watch?v=8Dd7KRpKeaE&t=88s
+
+---
+
 ## Collaborators
 
 - **Sujit Bhatta**
