@@ -81,7 +81,7 @@ Provide details about the dataset here (source, format, size, preprocessing step
 1. Download 'Report VX.docx' (X = the version of the report being edited).
 2. Open in Word (preferred).
 3. Click 'View' -> 'Outline'.
-4. Edit in Outline as it is the easiest way. Use 'Page Break' to start a new page, each new topic should be started on a new page.
+4. Edit in Outline as it is the easiest way. Use 'Page Break' to start a new page, each new topic should start on a new page.
 5. Once done, push to origin.
 
 ---
