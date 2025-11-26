@@ -1,0 +1,12 @@
+name: IN3063_Coursework_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - pip
+  - pytorch
