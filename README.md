@@ -79,5 +79,6 @@ Provide details about the dataset here (source, format, size, preprocessing step
 ## Collaborators
 
 - **Sujit Bhatta**
+- **Wael Khafagi**
 
 ---
