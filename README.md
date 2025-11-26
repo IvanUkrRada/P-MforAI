@@ -8,11 +8,7 @@ This repository contains the setup instructions, task breakdown, and environment
 
 ## Tasks Breakdown
 
-- **Task 1**
-  Description of Task 1 goes here.
-
-- **Task 2**
-  Description of Task 2 goes here.
+- **Can be found in 'CW Description.pdf'**
 
 ---
 
