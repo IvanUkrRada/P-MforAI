@@ -15,6 +15,7 @@ This repository contains the setup instructions, task breakdown, and environment
 ## Dataset Used
 
 https://www.kaggle.com/competitions/cifar-10/data
+https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
 
 ---
 
