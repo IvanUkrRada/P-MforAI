@@ -14,7 +14,7 @@ This repository contains the setup instructions, task breakdown, and environment
 
 ## Dataset Used
 
-Provide details about the dataset here (source, format, size, preprocessing steps, etc.).
+https://www.kaggle.com/competitions/cifar-10/data
 
 ---
 
