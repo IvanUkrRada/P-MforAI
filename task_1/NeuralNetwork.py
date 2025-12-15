@@ -9,7 +9,10 @@ regularizer (L1 or L2). Report the parameters used (update rule, learning rate, 
 epochs, batch size) and include the plots in your report.
 '''
 import numpy as np
-import activations as act
+from activations.ReLU import ReLU
+from activations.Sigmoid import Sigmoid
+from activations.Softmax import Softmax
+from Dropout import Dropout
 
 class NeuralNetwork:
     """
@@ -52,10 +55,19 @@ class NeuralNetwork:
         self.W, self.b = {}, {}
         self.initialise_weights() 
 
+        self.dropout_layers = {}
+        if self.dropout_rates is not None:
+            if len(self.dropout_rates) != self.len_hidden_layers:
+                raise ValueError("dropout rates must match number of hidden layers")
+
+            for i, p in enumerate(self.dropout_rates, start=1):
+                self.dropout_layers[i] = Dropout(p)
+
     '''
     Reference: Material used to learn about different kinds of initializer techniques.
     https://www.geeksforgeeks.org/machine-learning/weight-initialization-techniques-for-deep-neural-networks/
-    '''
+    '''   
+   
     def initialise_weights(self):
         # Collection of dimensions of all layers.
         dims = [self.input_size] + self.hidden_layers + [self.output_size]
@@ -71,19 +83,19 @@ class NeuralNetwork:
                 # Applying He-Normal Initialiser (specially for ReLU). 
                 scale = np.sqrt(2.0 / prev_layer)
                 self.W[i] = np.random.randn(curr_layer, prev_layer) * scale
-                self.b[i] = np.zeros((1, curr_layer))
+                self.b[i] = np.zeros((curr_layer, 1))
 
             elif current_activation == "sigmoid" or current_activation == "tanh":
                 # Applying Xavier/Glorot Normal Initialiser (specifically for sigmoid/tanh)
                 scale = np.sqrt(1.0 / prev_layer) 
                 self.W[i] = np.random.randn(curr_layer, prev_layer) * scale
-                self.b[i] = np.zeros((1, curr_layer))
+                self.b[i] = np.zeros((curr_layer, 1))
 
             elif current_activation == "softmax":
                 # Applying Xavier initialization ()
                 scale = np.sqrt(1.0 / prev_layer)
                 self.W[i] = np.random.randn(curr_layer, prev_layer) * scale
-                self.b[i] = np.zeros((1, curr_layer))
+                self.b[i] = np.zeros((curr_layer, 1))
 
             else:
                 # Fallback for unsupported/unknown activation functions
@@ -93,16 +105,16 @@ class NeuralNetwork:
 
     def get_activation(self, name):
         if name == "relu":
-            return act.ReLU()
+            return ReLU()
         elif name == "sigmoid":
-            return act.Sigmoid()
+            return Sigmoid()
         elif name == "softmax":
-            return act.Softmax()
+            return Softmax()
         else:
             raise ValueError(f"Unknown activation: {name}")
 
     
-    def forward_pass(self, X):  # No dropout used.
+    def forward_pass(self, X, training=True):  # Added dropout
         A = X.T
         self.cache = {"A0": A}  # A0 represents activation of input layer.
         self.activation_objects = {}
@@ -114,7 +126,12 @@ class NeuralNetwork:
             act = self.get_activation(self.activations[i-1])
             A = act.forward(Z)
             self.activation_objects[i] = act
+
+            if training and self.dropout_rates is not None and i in self.dropout_layers:
+                A = self.dropout_layers[i].forward(A, training = True)
+
             self.cache[f"A{i}"] = A
+
         return A
         
 
@@ -146,6 +163,9 @@ class NeuralNetwork:
             # gradient to propagate backward
             dA = self.W[i].T @ dZ
 
+            if self.dropout_rates is not None and i in self.dropout_layers:
+                dA = self.dropout_layers[i].backward(dA)
+
         
     def update_weights(self):
         for i in range(1, self.len_hidden_layers+1):
@@ -153,7 +173,7 @@ class NeuralNetwork:
             self.b[i] -= self.lr * self.grads[f"db{i}"]
         
     def predict(self, X):
-        output = self.forward_pass(X)
+        output = self.forward_pass(X, training=False)
         return np.argmax(output, axis=0)
     
     # For testing purposes:
@@ -171,7 +191,7 @@ class NeuralNetwork:
                 X_batch = X[i:i+batch_size]
                 y_batch = y[i:i+batch_size]
 
-                self.forward_pass(X_batch)
+                self.forward_pass(X_batch, training=True)
                 self.backward_pass(X_batch, y_batch)
 
             # Evaluating...
@@ -207,3 +227,32 @@ Can have a NN class that extends the superclass which applies dropout in hidden 
 #        2: array([[1.84532779, 0.05482559]]), 
 #        3: array([[-0.18495464],[-2.07575926],[ 1.45916958],[-1.3764414 ],[ 1.24237644]])
 #        }
+
+#Testing Dropout function
+
+import numpy as np
+
+#Test input
+X = np.random.randn(10, 5) 
+
+# Model with dropout at 50%
+model = NeuralNetwork(
+    input_size=5,
+    hidden_layers=[4],  #one hidden layer
+    output_size=3,
+    activations=["relu", "softmax"],
+    dropout_rates=[0.5]  #dropout on hidden layer
+)
+
+print(" === Forward pass with training=True (dp on) ===")
+out1 = model.forward_pass(X, training=True)
+out2 = model.forward_pass(X, training=True)
+
+print(out1)
+print("\nSecond pass:")
+print(out2)
+
+print("\n=== Forward pass with training=False (dp Off) ===")
+out_eval = model.forward_pass(X, training=False)
+print(out_eval)
+
