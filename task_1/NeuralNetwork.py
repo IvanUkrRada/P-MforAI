@@ -19,7 +19,7 @@ class NeuralNetwork:
         Fully parametrizable Neural Network.
         
         Parameters:
-        - input_size: int (e.g., 784 for MNIST, 3072 for CIFAR-10 flattened)
+        - input_size: int (3072 for CIFAR-10 flattened)
         - hidden_layers: list of ints → [64, 32] means two hidden layers with 64 and 32 units
         - output_size: int (number of classes)
         - activation: list → 'relu' or 'sigmoid' for all hidden layers (try with others if time for report),
@@ -82,25 +82,26 @@ class NeuralNetwork:
             if current_activation == "relu":
                 # Applying He-Normal Initialiser (specially for ReLU). 
                 scale = np.sqrt(2.0 / prev_layer)
-                self.W[i] = np.random.randn(curr_layer, prev_layer) * scale
-                self.b[i] = np.zeros((curr_layer, 1))
+                self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
+                self.b[i] = np.zeros((1, curr_layer))
 
             elif current_activation == "sigmoid" or current_activation == "tanh":
                 # Applying Xavier/Glorot Normal Initialiser (specifically for sigmoid/tanh)
                 scale = np.sqrt(1.0 / prev_layer) 
-                self.W[i] = np.random.randn(curr_layer, prev_layer) * scale
-                self.b[i] = np.zeros((curr_layer, 1))
+                self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
+                self.b[i] = np.zeros((1, curr_layer))
 
             elif current_activation == "softmax":
                 # Applying Xavier initialization ()
                 scale = np.sqrt(1.0 / prev_layer)
-                self.W[i] = np.random.randn(curr_layer, prev_layer) * scale
-                self.b[i] = np.zeros((curr_layer, 1))
+                self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
+                self.b[i] = np.zeros((1, curr_layer))
 
             else:
                 # Fallback for unsupported/unknown activation functions
                 print(f"Warning: Unknown activation '{current_activation}' at layer {i}. Defaulting to standard random initialisation.")
-                self.W[i] = np.random.randn(curr_layer, prev_layer) * 0.01
+                self.W[i] = np.random.randn(prev_layer, curr_layer) * 0.01
+                self.b[i] = np.zeros((1, curr_layer))
 
 
     def get_activation(self, name):
@@ -114,14 +115,14 @@ class NeuralNetwork:
             raise ValueError(f"Unknown activation: {name}")
 
     
-    def forward_pass(self, X, training=True):  # Added dropout
-        A = X.T
+    def forward_pass(self, X, training=True):
+        A = X   # A shape is now (32, 3072) i.e. (batch_size, features). Previously X.T caused a lot of shapes issues.
         self.cache = {"A0": A}  # A0 represents activation of input layer.
         self.activation_objects = {}
 
-        for i in range(1, self.len_hidden_layers + 1):
-            Z = self.W[i] @ A + self.b[i]
-            self.cache[f"Z{i}"] = Z
+        # When testing softmax was ignored hence forward not working properly hence fixed problem with +2.
+        for i in range(1, self.len_hidden_layers + 2):   
+            Z = A @ self.W[i] + self.b[i]
 
             act = self.get_activation(self.activations[i-1])
             A = act.forward(Z)
@@ -137,44 +138,54 @@ class NeuralNetwork:
 
     def backward_pass(self, X, y_true):
         m = X.shape[0]
-        y_true = y_true.T
 
-        y_pred = self.cache[f"A{self.len_hidden_layers}"]
+        y_pred = self.cache[f"A{self.len_hidden_layers + 1}"]
 
         # derivative of Loss wrt A for Softmax + Cross-entropy layer.
-        print(f"Y_prediction: {y_pred}")
         dA = y_pred - y_true
 
         # Collection cache for all gradients calculated.
         self.grads = {}
 
-        for i in reversed(range(1, self.len_hidden_layers + 1)):
+        for i in reversed(range(1, self.len_hidden_layers + 2)):
 
             # Activation backward
-            act = self.activation_objects[i]
-            dZ = act.backward(dA)
+            if self.activations[i-1] == "softmax":
+                dZ = dA 
+            else:
+                # This block only runs for hidden layers.
+                act = self.activation_objects[i]
+                dZ = act.backward(dA)
+
+            # Applying dropout mast to dZ.
+            if self.dropout_rates is not None and i in self.dropout_layers:
+                # The dropout mask (32, 4) must be applied to dZ (32, 4), not the later dA
+                # Adding mask to dA later changed the shape of the dA gradient.
+                dZ = self.dropout_layers[i].backward(dZ)
 
             # Linear backward
             A_prev = self.cache[f"A{i-1}"]
 
-            self.grads[f"dW{i}"] = (dZ @ A_prev.T) / m
-            self.grads[f"db{i}"] = np.sum(dZ, axis=1, keepdims=True) / m
+            # Recalculating dW and db for Batch-first convention
+            self.grads[f"dW{i}"] = (A_prev.T @ dZ) / m 
+            # db calculation: Sum across the batch (axis=0). db shape: (1, curr_features)
+            self.grads[f"db{i}"] = np.sum(dZ, axis=0, keepdims=True) / m 
+
 
             # gradient to propagate backward
-            dA = self.W[i].T @ dZ
+            dA = dZ @ self.W[i].T
 
-            if self.dropout_rates is not None and i in self.dropout_layers:
-                dA = self.dropout_layers[i].backward(dA)
 
-        
-    def update_weights(self):
+    # lr is learning rate for the NN.
+    def update_weights(self, lr):
         for i in range(1, self.len_hidden_layers+1):
-            self.W[i] -= self.lr * self.grads[f"dW{i}"]
-            self.b[i] -= self.lr * self.grads[f"db{i}"]
+            self.W[i] -= lr * self.grads[f"dW{i}"]
+            self.b[i] -= lr * self.grads[f"db{i}"]
         
     def predict(self, X):
         output = self.forward_pass(X, training=False)
-        return np.argmax(output, axis=0)
+        predictions = np.argmax(output, axis=1)
+        return predictions
     
     # For testing purposes:
     def get_W(self):
@@ -183,8 +194,8 @@ class NeuralNetwork:
         return self.b
     
     def train(self, X, y, X_val, y_val, 
-                epochs=10, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
-        n = X.shape[0] 
+                epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
+        n = X.shape[0]
 
         for epoch in range(epochs):
             for i in range(0, n, batch_size):
@@ -193,11 +204,14 @@ class NeuralNetwork:
 
                 self.forward_pass(X_batch, training=True)
                 self.backward_pass(X_batch, y_batch)
+                self.update_weights(lr)
 
             # Evaluating...
             prediction = self.predict(X_val)
-            acc = np.mean(prediction == y_val)
-            print(f"Epoch {epoch} / {epochs}, Accuracy: {acc:.4f * 100}")
+            y_val_labels = np.argmax(y_val, axis=1)
+            acc = np.mean(prediction == y_val_labels)
+            
+            print(f"Epoch {epoch} / {epochs}, Accuracy: {acc * 100}%")
 
         print("Training Completed!!!")
 
@@ -212,47 +226,5 @@ model1 = NeuralNetwork(5, [2, 1], 5, ["relu", "sigmoid", "softmax"])
 
 
 '''
-Can have a NN class that extends the superclass which applies dropout in hidden layers. (i.e. different model[])
+Can have a NN class that extends the superclass which applies no dropout in hidden layers. (i.e. different model[])
 '''
-
-# {1: array([[0.], [0.]]), 
-#  2: array([[0.]]), 
-#  3: array([[0.],[0.],[0.],[0.],[0.]])
-# }
-
-            # self.W[i] = np.random.randn(dims[i], dims[i-1]) * np.sqrt(2.0/dims[i-1])
-
-
-# Weight: {1: array([[-0.58176609,  0.36755163, -0.43474151,  0.65772275, -0.40864235], [-0.16379515,  1.83227004, -0.21435161,  0.67958921,  0.71505445]]), 
-#        2: array([[1.84532779, 0.05482559]]), 
-#        3: array([[-0.18495464],[-2.07575926],[ 1.45916958],[-1.3764414 ],[ 1.24237644]])
-#        }
-
-#Testing Dropout function
-
-import numpy as np
-
-#Test input
-X = np.random.randn(10, 5) 
-
-# Model with dropout at 50%
-model = NeuralNetwork(
-    input_size=5,
-    hidden_layers=[4],  #one hidden layer
-    output_size=3,
-    activations=["relu", "softmax"],
-    dropout_rates=[0.5]  #dropout on hidden layer
-)
-
-print(" === Forward pass with training=True (dp on) ===")
-out1 = model.forward_pass(X, training=True)
-out2 = model.forward_pass(X, training=True)
-
-print(out1)
-print("\nSecond pass:")
-print(out2)
-
-print("\n=== Forward pass with training=False (dp Off) ===")
-out_eval = model.forward_pass(X, training=False)
-print(out_eval)
-

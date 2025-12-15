@@ -9,6 +9,6 @@ class Sigmoid:
         self.cache = output
         return output
     
-    def backwards (self, dout: np.ndarray) -> np.ndarray:
+    def backward(self, dout: np.ndarray) -> np.ndarray:
         output = self.cache
         return dout * output * (1 - output)
