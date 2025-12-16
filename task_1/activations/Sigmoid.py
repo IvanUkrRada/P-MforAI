@@ -5,10 +5,12 @@ class Sigmoid:
         self.cache = None
 
     def forward(self, x: np.ndarray) -> np.ndarray:
-        output = 1 / (1 + np.exp(-x))
+        positive_x = np.maximum(0, x)   # To avoid runtime error with overflow.
+        output = 1 / (1 + np.exp(-positive_x))
         self.cache = output
         return output
     
     def backward(self, dout: np.ndarray) -> np.ndarray:
         output = self.cache
         return dout * output * (1 - output)
+    

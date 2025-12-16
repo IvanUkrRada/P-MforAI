@@ -150,15 +150,17 @@ class NeuralNetwork:
         for i in reversed(range(1, self.len_hidden_layers + 2)):
 
             # Activation backward
-            if self.activations[i-1] == "softmax":
-                dZ = dA 
+            if i == self.len_hidden_layers + 1:
+                # Softmax + Cross-Entropy
+                dZ = dA
             else:
-                # This block only runs for hidden layers.
+                # This block only runs hidden layers.
                 act = self.activation_objects[i]
                 dZ = act.backward(dA)
 
+
             # Applying dropout mast to dZ.
-            if self.dropout_rates is not None and i in self.dropout_layers:
+            if self.dropout_rates is not None and i <= self.len_hidden_layers:
                 # The dropout mask (32, 4) must be applied to dZ (32, 4), not the later dA
                 # Adding mask to dA later changed the shape of the dA gradient.
                 dZ = self.dropout_layers[i].backward(dZ)
@@ -178,7 +180,7 @@ class NeuralNetwork:
 
     # lr is learning rate for the NN.
     def update_weights(self, lr):
-        for i in range(1, self.len_hidden_layers+1):
+        for i in range(1, self.len_hidden_layers + 2):
             self.W[i] -= lr * self.grads[f"dW{i}"]
             self.b[i] -= lr * self.grads[f"db{i}"]
         
@@ -198,31 +200,29 @@ class NeuralNetwork:
         n = X.shape[0]
 
         for epoch in range(epochs):
+            perm = np.random.permutation(n)
+            X_shuffled = X[perm]
+            y_shuffled = y[perm]
+
             for i in range(0, n, batch_size):
-                X_batch = X[i:i+batch_size]
-                y_batch = y[i:i+batch_size]
+                X_batch = X_shuffled[i:i+batch_size]
+                y_batch = y_shuffled[i:i+batch_size]
 
                 self.forward_pass(X_batch, training=True)
                 self.backward_pass(X_batch, y_batch)
                 self.update_weights(lr)
-
+            
             # Evaluating...
             prediction = self.predict(X_val)
             y_val_labels = np.argmax(y_val, axis=1)
             acc = np.mean(prediction == y_val_labels)
             
-            print(f"Epoch {epoch} / {epochs}, Accuracy: {acc * 100}%")
+            print(f"Epoch {epoch+1} / {epochs}, Accuracy: {(acc * 100):.4f}%")
 
         print("Training Completed!!!")
 
 
 
-
-model1 = NeuralNetwork(5, [2, 1], 5, ["relu", "sigmoid", "softmax"])
-# print(f"Weight: {model1.get_W()[1] . T}")
-# print(f"bias : {model1.get_b()}")
-
-# model1.train(model1, )
 
 
 '''
