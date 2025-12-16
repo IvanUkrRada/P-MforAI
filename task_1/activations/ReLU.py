@@ -8,6 +8,6 @@ class ReLU:
         self.cache = x
         return np.maximum(0, x)
 
-    def backwards (self, dout: np.ndarray) -> np.ndarray:
+    def backward(self, dout: np.ndarray) -> np.ndarray:
         x = self.cache
         return dout * (x > 0)
