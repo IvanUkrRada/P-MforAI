@@ -12,17 +12,18 @@ import numpy as np
 
 class Dropout:
     def __init__(self, p=0.5):
-        if p <= 0 or p > 1:
-            raise ValueError("Dropout keep probability p must be in (0,1)")
+        if p < 0 or p >= 1:
+            raise ValueError("Dropout keep probability p must be in [0,1)")
         self.p = p          # keep probability
         self.mask = None   # mask for backprop
 
     def forward(self, x, training=True):
-        if not training:
+        if not training or self.p == 0:
             return x        # no dropout at test time
 
         # inverted dropout mask
-        self.mask = (np.random.rand(*x.shape) < self.p) / self.p
+        keep_prob = 1.0 - self.p
+        self.mask = (np.random.rand(*x.shape) < keep_prob) / keep_prob
         return x * self.mask
 
     def backward(self, dout):
