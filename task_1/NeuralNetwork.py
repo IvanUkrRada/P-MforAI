@@ -194,9 +194,27 @@ class NeuralNetwork:
         return self.W
     def get_b(self):
         return self.b
-    
+
+    def get_params(self):
+        params = {}
+        for i in range(1, self.len_hidden_layers + 2):
+            params[f"W{i}"] = self.W[i]
+            params[f"b{i}"] = self.b[i]
+        return params
+
     def train(self, X, y, X_val, y_val, 
                 epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
+        #implementing optimiser usage here
+        from Optimisers import SGD, SGDMomentum
+        if optimizer is None or optimizer == "sgd":
+            opt = SGD(lr=lr)
+        elif optimizer in ["momentum", "sgd_momentum"]:
+            opt = SGDMomentum(lr=lr, beta=0.9)
+        else:
+            opt = optimizer
+
+        params = self.get_params()
+
         n = X.shape[0]
 
         for epoch in range(epochs):
@@ -210,7 +228,10 @@ class NeuralNetwork:
 
                 self.forward_pass(X_batch, training=True)
                 self.backward_pass(X_batch, y_batch)
-                self.update_weights(lr)
+
+               # self.update_weights(lr)
+               #replaced refrence to weights to optimisers
+                opt.update(params, self.grads)
             
             # Evaluating...
             prediction = self.predict(X_val)
