@@ -15,8 +15,8 @@ class Softmax:
         return probs
 
     def backwards(self, dout: np.ndarray) -> np.ndarray:
-        s = self.cache  # softmax output
-        # Jacobian–vector product: dx = s * (dout - (dout * s) summed over classes)
-        dot = np.sum(dout * s, axis=1, keepdims=True)
-        dx = s * (dout - dot)
-        return dx
+        """
+        When used with cross-entropy, the gradient is already computed
+        in backward_pass as (y_pred - y_true) in NeuralNetwork class.
+        """
+        return dout

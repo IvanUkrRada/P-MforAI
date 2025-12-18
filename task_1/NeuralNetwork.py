@@ -12,6 +12,7 @@ import numpy as np
 from activations.ReLU import ReLU
 from activations.Sigmoid import Sigmoid
 from activations.Softmax import Softmax
+from activations.SoftmaxCrossEntropy import SoftmaxCrossEntropy
 from Dropout import Dropout
 
 class NeuralNetwork:
@@ -194,6 +195,26 @@ class NeuralNetwork:
         return self.W
     def get_b(self):
         return self.b
+    def compute_loss(self, y_true):
+        """
+        Compute cross-entropy loss using SoftmaxCrossEntropy.
+        This is just for monitoring - doesn't affect training.
+        """
+        # Get the logits (pre-softmax activations) from output layer
+        # We need to recompute them or store them
+        y_pred = self.cache[f"A{self.len_hidden_layers + 1}"]
+        
+        # Calculate loss
+        loss_fn = SoftmaxCrossEntropy()
+        
+        # Convert predictions back to logits (approximately) OR
+        # Better: store logits in forward pass
+        # For now, use predictions directly with small epsilon
+        eps = 1e-8
+        loss = -np.mean(np.sum(y_true * np.log(y_pred + eps), axis=1))
+        
+        return loss
+    
     
     def train(self, X, y, X_val, y_val, 
                 epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
@@ -204,12 +225,22 @@ class NeuralNetwork:
             X_shuffled = X[perm]
             y_shuffled = y[perm]
 
+            epoch_loss = 0
+            num_batches = 0
+
             for i in range(0, n, batch_size):
                 X_batch = X_shuffled[i:i+batch_size]
                 y_batch = y_shuffled[i:i+batch_size]
 
                 self.forward_pass(X_batch, training=True)
+
+                # Loss calc for evaluation when forward reaches at output layer.
+                batch_loss = self.compute_loss(y_batch)
+                epoch_loss += batch_loss
+                num_batches += 1
+
                 self.backward_pass(X_batch, y_batch)
+
                 self.update_weights(lr)
             
             # Evaluating...
@@ -217,14 +248,8 @@ class NeuralNetwork:
             y_val_labels = np.argmax(y_val, axis=1)
             acc = np.mean(prediction == y_val_labels)
             
-            print(f"Epoch {epoch+1} / {epochs}, Accuracy: {(acc * 100):.4f}%")
+            avg_loss = epoch_loss / num_batches
+
+            print(f"Epoch {epoch+1} / {epochs}, Loss: {avg_loss:.4f}, Accuracy: {(acc * 100):.4f}%")
 
         print("Training Completed!!!")
-
-
-
-
-
-'''
-Can have a NN class that extends the superclass which applies no dropout in hidden layers. (i.e. different model[])
-'''
