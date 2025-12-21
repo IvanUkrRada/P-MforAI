@@ -23,13 +23,10 @@ class SoftmaxCrossEntropy:
         return loss
 
 
-    # NOTE: Don't need to use this function in NN. It's used in the backwards code. Could change later on.
-    def backward(self) -> np.ndarray:
+    # NOTE: Don't need to use this function in NN. It's used in the backwards code inside NN class. 
+    def backward(self):
         """
-        Calculates dX (gradient wrt logits/input to this layer).
-        The result is dA of the previous layer (or dZ of the current layer in your naming convention)
+        When used with cross-entropy, the gradient is already computed
+        in backward_pass as (y_pred - y_true) in NeuralNetwork class.
         """
-        batch_size = self.cache_labels.shape[0]
-        # The simplified gradient: (Predicted Probs - True Labels) / Batch Size
-        dX = (self.probs - self.cache_labels) / batch_size
-        return dX
+        return
