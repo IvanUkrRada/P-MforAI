@@ -216,11 +216,6 @@ class NeuralNetwork:
         return loss
 
     def get_params(self):
-        """
-        Returns a flat dictionary of parameters for the optimizer.
-        Keys are 'W1', 'b1', 'W2', 'b2', etc.
-        Values are references to the actual numpy arrays.
-        """
         params = {}
         for i in range(1, self.len_hidden_layers + 2):
             params[f"W{i}"] = self.W[i]
