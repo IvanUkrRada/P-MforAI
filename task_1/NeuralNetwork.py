@@ -218,6 +218,17 @@ class NeuralNetwork:
     
     def train(self, X, y, X_val, y_val, 
                 epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
+        #implementing optimiser usage here
+        from Optimisers import SGD, SGDMomentum
+        if optimizer is None or optimizer == "sgd":
+            opt = SGD(lr=lr)
+        elif optimizer in ["momentum", "sgd_momentum"]:
+            opt = SGDMomentum(lr=lr, beta=0.9)
+        else:
+            opt = optimizer
+
+        params = self.get_params()
+
         n = X.shape[0]
 
         for epoch in range(epochs):
