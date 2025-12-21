@@ -214,11 +214,26 @@ class NeuralNetwork:
         loss = -np.mean(np.sum(y_true * np.log(y_pred + eps), axis=1))
         
         return loss
-    
-    
-    def train(self, X, y, X_val, y_val, 
-                epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
+
+    def get_params(self):
+        """
+        Returns a flat dictionary of parameters for the optimizer.
+        Keys are 'W1', 'b1', 'W2', 'b2', etc.
+        Values are references to the actual numpy arrays.
+        """
+        params = {}
+        for i in range(1, self.len_hidden_layers + 2):
+            params[f"W{i}"] = self.W[i]
+            params[f"b{i}"] = self.b[i]
+        return params
+
+    def train(self, X, y, X_val, y_val,
+              epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
         n = X.shape[0]
+
+        # 1. Fetch parameters references once if using an optimizer
+        if optimizer:
+            params = self.get_params()
 
         for epoch in range(epochs):
             perm = np.random.permutation(n)
@@ -229,27 +244,33 @@ class NeuralNetwork:
             num_batches = 0
 
             for i in range(0, n, batch_size):
-                X_batch = X_shuffled[i:i+batch_size]
-                y_batch = y_shuffled[i:i+batch_size]
+                X_batch = X_shuffled[i:i + batch_size]
+                y_batch = y_shuffled[i:i + batch_size]
 
                 self.forward_pass(X_batch, training=True)
 
-                # Loss calc for evaluation when forward reaches at output layer.
                 batch_loss = self.compute_loss(y_batch)
                 epoch_loss += batch_loss
                 num_batches += 1
 
                 self.backward_pass(X_batch, y_batch)
 
-                self.update_weights(lr)
-            
-            # Evaluating...
+                # 2. Optimization Step
+                if optimizer:
+                    # The optimizer updates the arrays inside 'params' in-place.
+                    # Since 'params' points to self.W and self.b, the model updates automatically.
+                    optimizer.update(params, self.grads)
+                else:
+                    # Fallback to basic SGD if no optimizer provided
+                    self.update_weights(lr)
+
+            # Evaluation
             prediction = self.predict(X_val)
             y_val_labels = np.argmax(y_val, axis=1)
             acc = np.mean(prediction == y_val_labels)
-            
+
             avg_loss = epoch_loss / num_batches
 
-            print(f"Epoch {epoch+1} / {epochs}, Loss: {avg_loss:.4f}, Accuracy: {(acc * 100):.4f}%")
+            print(f"Epoch {epoch + 1} / {epochs}, Loss: {avg_loss:.4f}, Accuracy: {(acc * 100):.4f}%")
 
         print("Training Completed!!!")
