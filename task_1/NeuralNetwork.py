@@ -171,6 +171,17 @@ class NeuralNetwork:
 
             # Recalculating dW and db for Batch-first convention
             self.grads[f"dW{i}"] = (A_prev.T @ dZ) / m 
+
+            # Adding regularisation on weights.
+            if self.regularisation == "L2":
+                # L2 regularization: add λ*W to gradient
+                self.grads[f"dW{i}"] += (self.reg_lambda / m) * self.W[i]
+            elif self.regularisation == "L1":
+                # L1 regularization: add λ*sign(W) to gradient
+                self.grads[f"dW{i}"] += (self.reg_lambda / m) * np.sign(self.W[i])
+            else:
+                pass
+
             # db calculation: Sum across the batch (axis=0). db shape: (1, curr_features)
             self.grads[f"db{i}"] = np.sum(dZ, axis=0, keepdims=True) / m 
 
@@ -179,22 +190,23 @@ class NeuralNetwork:
             dA = dZ @ self.W[i].T
 
 
-    # lr is learning rate for the NN.
     def update_weights(self, lr):
+        """
+        Docstring for update_weights: Updates weights. Called during training for every epoch.
+        
+        :param lr: Learning rate of the model.
+        """
         for i in range(1, self.len_hidden_layers + 2):
             self.W[i] -= lr * self.grads[f"dW{i}"]
             self.b[i] -= lr * self.grads[f"db{i}"]
         
+
     def predict(self, X):
         output = self.forward_pass(X, training=False)
         predictions = np.argmax(output, axis=1)
         return predictions
     
-    # For testing purposes:
-    def get_W(self):
-        return self.W
-    def get_b(self):
-        return self.b
+
     def compute_loss(self, y_true):
         """
         Compute cross-entropy loss using SoftmaxCrossEntropy.
@@ -211,16 +223,36 @@ class NeuralNetwork:
         # Better: store logits in forward pass
         # For now, use predictions directly with small epsilon
         eps = 1e-8
-        loss = -np.mean(np.sum(y_true * np.log(y_pred + eps), axis=1))
+        cross_entropy_loss = -np.mean(np.sum(y_true * np.log(y_pred + eps), axis=1))
         
-        return loss
+        reg_loss = 0.0
+        if self.regularisation is not None:
+            for i in range(1, self.len_hidden_layers + 2):
+                if self.regularisation == "L2":
+                    # L2: sum of squared weights
+                    reg_loss += np.sum(self.W[i] ** 2)
+                elif self.regularisation == "L1":
+                    # L1: sum of absolute weights
+                    reg_loss += np.sum(np.abs(self.W[i]))
+            
+            # Scaling reg_loss. Without it total_loss was shown in thousands.
+            reg_loss *= self.reg_lambda / (2 if self.regularisation == "L2" else 1)
+
+        total_loss = cross_entropy_loss + reg_loss
+
+        return total_loss
+    
 
     def get_params(self):
+        """
+        Function to get params for optimizer.
+        """
         params = {}
         for i in range(1, self.len_hidden_layers + 2):
             params[f"W{i}"] = self.W[i]
             params[f"b{i}"] = self.b[i]
         return params
+
 
     def train(self, X, y, X_val, y_val,
               epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
@@ -237,6 +269,14 @@ class NeuralNetwork:
 
             epoch_loss = 0
             num_batches = 0
+
+            # Adding decaying learning rate if decay inputted as parameter.
+            
+            # Exponential decay used.
+            # curr_lr = lr - (lr ** epoch)
+
+            # Step Decay
+            curr_lr = lr - (1 + decay * epoch)
 
             for i in range(0, n, batch_size):
                 X_batch = X_shuffled[i:i + batch_size]
@@ -257,7 +297,7 @@ class NeuralNetwork:
                     optimizer.update(params, self.grads)
                 else:
                     # Fallback to basic SGD if no optimizer provided
-                    self.update_weights(lr)
+                    self.update_weights(curr_lr)
 
             # Evaluation
             prediction = self.predict(X_val)
