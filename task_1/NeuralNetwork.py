@@ -13,6 +13,8 @@ from activations.ReLU import ReLU
 from activations.Sigmoid import Sigmoid
 from activations.Softmax import Softmax
 from activations.SoftmaxCrossEntropy import SoftmaxCrossEntropy
+from activations.Tanh import Tanh
+from activations.LeakyReLU import LeakyReLU
 from Dropout import Dropout
 
 class NeuralNetwork:
@@ -45,7 +47,7 @@ class NeuralNetwork:
         np.random.seed(seed)
 
         # Input Validation: Ensuring the number of activations provided matches the number of layers
-        expected_activations_count = self.len_hidden_layers + 1 # All hidden layers + the final output layer
+        expected_activations_count = self.len_hidden_layers
         if expected_activations_count != len(self.activations):
             raise ValueError(
                 f"Mismatch in number of activations provided. Expected {expected_activations_count} "
@@ -64,45 +66,57 @@ class NeuralNetwork:
             for i, p in enumerate(self.dropout_rates, start=1):
                 self.dropout_layers[i] = Dropout(p)
 
+
     '''
     Reference: Material used to learn about different kinds of initializer techniques.
     https://www.geeksforgeeks.org/machine-learning/weight-initialization-techniques-for-deep-neural-networks/
     '''   
-   
     def initialise_weights(self):
+        """
+        Initialize weights and biases based on activation function.
+        
+        - ReLU/LeakyReLU: He initialization
+        - Sigmoid/Tanh: Xavier/Glorot initialization
+        - Softmax: Xavier initialization
+        """
         # Collection of dimensions of all layers.
         dims = [self.input_size] + self.hidden_layers + [self.output_size]
 
-        # He-Normal initialisation is better for ReLU
-        for i in range(1, len(dims)):
-            current_activation = self.activations[i-1]
-            
+        for i in range(1, len(dims)):            
             prev_layer = dims[i-1] 
             curr_layer = dims[i]
 
+            if i <= self.len_hidden_layers:
+                current_activation = self.activations[i-1]
+            else:
+                current_activation = "output"  # Output / Softmax layer
+            
+
             if current_activation == "relu":
-                # Applying He-Normal Initialiser (specially for ReLU). 
-                scale = np.sqrt(2.0 / prev_layer)
-                self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
-                self.b[i] = np.zeros((1, curr_layer))
+                # Applying He-Normal Initialiser (specially better for ReLU according to reference). 
+                scale = np.sqrt(1.0 / prev_layer)
+            
+            elif current_activation in ["leaky_relu", "leakyrelu", "lrelu"]:
+                alpha = 0.01
+                scale = np.sqrt(1.0 / (prev_layer * (1 + alpha**2)))
 
             elif current_activation == "sigmoid" or current_activation == "tanh":
                 # Applying Xavier/Glorot Normal Initialiser (specifically for sigmoid/tanh)
-                scale = np.sqrt(1.0 / prev_layer) 
-                self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
-                self.b[i] = np.zeros((1, curr_layer))
+                scale = np.sqrt(2.0 / (prev_layer + curr_layer))
 
-            elif current_activation == "softmax":
-                # Applying Xavier initialization ()
-                scale = np.sqrt(1.0 / prev_layer)
-                self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
-                self.b[i] = np.zeros((1, curr_layer))
+            elif current_activation == "output":
+                # Applying Xavier initialization.
+                scale = np.sqrt(2.0 / (prev_layer + curr_layer))
+
 
             else:
                 # Fallback for unsupported/unknown activation functions
                 print(f"Warning: Unknown activation '{current_activation}' at layer {i}. Defaulting to standard random initialisation.")
-                self.W[i] = np.random.randn(prev_layer, curr_layer) * 0.01
-                self.b[i] = np.zeros((1, curr_layer))
+                scale = 0.01
+
+            self.W[i] = np.random.randn(prev_layer, curr_layer) * scale
+            self.b[i] = np.zeros((1, curr_layer))
+
 
 
     def get_activation(self, name):
@@ -112,6 +126,10 @@ class NeuralNetwork:
             return Sigmoid()
         elif name == "softmax":
             return Softmax()
+        elif name == "tanh":
+            return Tanh()
+        elif name in ["leaky_relu", "leakyrelu", "lrelu"]: # Aliases so there is less confusion.
+            return LeakyReLU()
         else:
             raise ValueError(f"Unknown activation: {name}")
 
@@ -121,8 +139,8 @@ class NeuralNetwork:
         self.cache = {"A0": A}  # A0 represents activation of input layer.
         self.activation_objects = {}
 
-        # When testing softmax was ignored hence forward not working properly hence fixed problem with +2.
-        for i in range(1, self.len_hidden_layers + 2):   
+        # Process hidden layers (not output layer yet)
+        for i in range(1, self.len_hidden_layers + 1):   
             Z = A @ self.W[i] + self.b[i]
 
             act = self.get_activation(self.activations[i-1])
@@ -134,7 +152,18 @@ class NeuralNetwork:
 
             self.cache[f"A{i}"] = A
 
-        return A
+        # Processing output/softmax layer.
+        i = self.len_hidden_layers + 1
+        Z = A @ self.W[i] + self.b[i]
+        self.cache[f"Z{i}"] = Z 
+        
+        # For prediction, we need probabilities
+        if not training:
+            softmax = Softmax()
+            A = softmax.forward(Z)
+            self.cache[f"A{i}"] = A
+        
+        return Z if training else A
         
 
     def backward_pass(self, X, y_true):
@@ -143,7 +172,7 @@ class NeuralNetwork:
         y_pred = self.cache[f"A{self.len_hidden_layers + 1}"]
 
         # derivative of Loss wrt A for Softmax + Cross-entropy layer.
-        dA = y_pred - y_true
+        dA = (y_pred - y_true)
 
         # Collection cache for all gradients calculated.
         self.grads = {}
@@ -213,18 +242,16 @@ class NeuralNetwork:
         This is just for monitoring - doesn't affect training.
         """
         # Get the logits (pre-softmax activations) from output layer
-        # We need to recompute them or store them
-        y_pred = self.cache[f"A{self.len_hidden_layers + 1}"]
-        
+        logits = self.cache[f"Z{self.len_hidden_layers + 1}"]
+
         # Calculate loss
         loss_fn = SoftmaxCrossEntropy()
+        cross_entropy_loss = loss_fn.forward(logits, y_true)
+
+        # Storing probs for backward pass
+        self.cache[f"A{self.len_hidden_layers + 1}"] = loss_fn.probs
         
-        # Convert predictions back to logits (approximately) OR
-        # Better: store logits in forward pass
-        # For now, use predictions directly with small epsilon
-        eps = 1e-8
-        cross_entropy_loss = -np.mean(np.sum(y_true * np.log(y_pred + eps), axis=1))
-        
+        # Applying regularization
         reg_loss = 0.0
         if self.regularisation is not None:
             for i in range(1, self.len_hidden_layers + 2):

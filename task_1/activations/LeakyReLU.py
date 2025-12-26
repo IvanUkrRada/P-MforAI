@@ -1,16 +1,16 @@
 import numpy as np
 
-class ReLU:
+class LeakyReLU:
     """
-    Rectified Linear Unit activation function.
+    Leaky ReLU activation function.
     
-    Forward: f(x) = max(0, x)
-    Backward: f'(x) = 1 if x > 0, else 0
+    Forward: f(x) = x if x > 0, else alpha * x
+    Backward: f'(x) = 1 if x > 0, else alpha
     """
-    def __init__ (self):
+    def __init__ (self, alpha=0.01):
         self.cache = None
+        self.alpha = alpha
         
-
     def forward(self, x: np.ndarray) -> np.ndarray:
         """
         Forward pass.
@@ -22,7 +22,7 @@ class ReLU:
             Activated output, same shape as input
         """
         self.cache = x
-        return np.maximum(0, x)
+        return np.maximum(x, x * self.alpha)
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
@@ -35,4 +35,5 @@ class ReLU:
             Gradient with respect to input
         """
         x = self.cache
-        return dout * (x > 0)
+        dx = np.where(x > 0, 1, self.alpha)
+        return dout * dx
