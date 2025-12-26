@@ -258,6 +258,14 @@ class NeuralNetwork:
               epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
         n = X.shape[0]
 
+        # Initialize history tracking
+        history = {
+            'train_loss': [],
+            'train_acc': [],
+            'val_loss': [],
+            'val_acc': []
+        }
+
         # 1. Fetch parameters references once if using an optimizer
         if optimizer:
             params = self.get_params()
@@ -299,13 +307,29 @@ class NeuralNetwork:
                     # Fallback to basic SGD if no optimizer provided
                     self.update_weights(curr_lr)
 
-            # Evaluation
-            prediction = self.predict(X_val)
+            # Training accuracy
+            train_prediction = self.predict(X)
+            y_train_labels = np.argmax(y, axis=1)
+            train_acc = np.mean(train_prediction == y_train_labels)
+            
+            # Validation accuracy
+            val_prediction = self.predict(X_val)
             y_val_labels = np.argmax(y_val, axis=1)
-            acc = np.mean(prediction == y_val_labels)
+            val_acc = np.mean(val_prediction == y_val_labels)
 
-            avg_loss = epoch_loss / num_batches
+            # Compute validation loss
+            self.forward_pass(X_val, training=False)
+            val_loss = self.compute_loss(y_val)
 
-            print(f"Epoch {epoch + 1} / {epochs}, Loss: {avg_loss:.4f}, Accuracy: {(acc * 100):.4f}%")
+            avg_train_loss = epoch_loss / num_batches
+
+            # Store metrics
+            history['train_loss'].append(avg_train_loss)
+            history['train_acc'].append(train_acc)
+            history['val_loss'].append(val_loss)
+            history['val_acc'].append(val_acc)
+
+            print(f"Epoch {epoch + 1} / {epochs}, Train Loss: {avg_train_loss:.4f}, Train Acc: {(train_acc * 100):.2f}%, Val Loss: {val_loss:.4f}, Val Acc: {(val_acc * 100):.2f}%")
 
         print("Training Completed!!!")
+        return history
