@@ -4,11 +4,32 @@ import numpy as np
 
 
 class SoftmaxCrossEntropy:
+    """
+    Combined Softmax activation and Cross-Entropy loss layer.
+    
+    Softmax: P(y_i) = exp(x_i) / Σ exp(x_j)
+    Cross-Entropy: L = -Σ y_true * log(y_pred)
+    
+    Combined gradient simplifies to: y_pred - y_true
+    """
     def __init__(self):
         self.probs = None 
         self.cache_labels = None 
 
     def forward(self, logits: np.ndarray, cache_labels: np.ndarray) -> np.ndarray:
+        """
+        Forward pass computing softmax probabilities and cross-entropy loss.
+
+        Args:
+            logits: Raw network outputs, shape (batch_size, num_classes): For understanding it's just x but 
+                When a single sample  x that has gone through trenches with couple of hidden layers and 
+                when it passes through linear layer and reaches SoftMax it's called "logits".
+            cache_labels: one-hot encoded, shape (batch_size, num_classes)
+                Remember it has to be one-hot encoded
+        
+        Returns:
+            Int scalar loss value
+        """
         # Softmax calculation
         shifted = logits - np.max(logits, axis=1, keepdims=True)
         exp_x = np.exp(shifted)
@@ -23,10 +44,11 @@ class SoftmaxCrossEntropy:
         return loss
 
 
-    # NOTE: Don't need to use this function in NN. It's used in the backwards code inside NN class. 
     def backward(self):
         """
-        When used with cross-entropy, the gradient is already computed
-        in backward_pass as (y_pred - y_true) in NeuralNetwork class.
+        Backward pass not implemented here.
+        
+        The gradient (probs - labels) is computed directly in the 
+        NeuralNetwork class backward_pass method for efficiency.
         """
         return
