@@ -121,6 +121,9 @@ This repository contains the setup instructions, task breakdown, and environment
 1. **Navigate to the project directory**
    
    Ensure you are in the directory where the `task2.yml` file is located.
+   Ensure that folder lungcolon includes file from https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images
+   5 folders in total 5,000 per class samples (images) in each folder names as in kaggle
+   
 
 3. **Create the Conda environment**
 
