@@ -18,7 +18,7 @@ This repository contains the setup instructions, task breakdown, and environment
 
 - https://www.kaggle.com/competitions/cifar-10/data (Task 1)
 - https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz (Task 1)
-- https://arxiv.org/abs/1912.12142v1 (Task 2)
+- https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images (Task 2)
 
 ---
 ---
@@ -114,6 +114,17 @@ This repository contains the setup instructions, task breakdown, and environment
  # CUDA 13.0
  - pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu130
 
+---
+## Install data set from Kaggle
+ - Click on this link (https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images) and download the data sets "lung_colon_image_set"
+ - Once downloaded, unzip and drag all the sub folders (5) from the "lung_image_sets" (3 subfolders) and "colon_image_sets" (2 subfolders) folders into the "lungcolon" folder inside of "task2"
+ - They should look like this in the "lungcolon":
+    - colon_aca
+    - colon_n
+    - lung_aca
+    - lung_n
+    - lung_scc
+ - You should be done.
 ---
 
 ## Environment for Task 2
