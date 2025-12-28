@@ -93,10 +93,15 @@ Follow these tutorials, I recommend the second link.
 - https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/setting-up-github-desktop
 - https://www.youtube.com/watch?v=8Dd7KRpKeaE&t=88s
 
----
+## Task-2
+
+ - For Task - 2 Anaconda Navigator was used to run VS code
+ # CUDA 13.0
+ - pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu130
 
 ## Collaborators
 
+- **Ivan Radavskyi** 
 - **Sujit Bhatta**
 - **Wael Khafagi**
 - **Yaseen Mneimneih**
