@@ -1,16 +1,20 @@
 """
-Docstring for task_1.activations.Dropout
-Task 1d: Implement dropout
+Inverted Dropout regularization layer.
 
-d. Present dropout in report. implement inverted dropout. forward and backward pass should be implemented. Present in report
-
-Note: Test performance is critical, it is preferable to leaving the forward pass unchanged at test time. 
-therefore, in most implementations inverted dropout is employed to overcome undesirable property of the original input.
-
+Dropout prevents overfitting by randomly dropping units during training.
+Inverted dropout scales activations during training so test-time behavior
+remains unchanged without requiring scaling.
 """
 import numpy as np
 
 class Dropout:
+    """
+    Inverted Dropout layer for regularization.
+    
+    Forward (training): output = input * mask / (1 - p)
+    Forward (testing):  output = input
+    Backward:           gradient = upstream_grad * mask
+    """
     def __init__(self, p=0.5):
         if p < 0 or p >= 1:
             raise ValueError("Dropout keep probability p must be in [0,1)")
@@ -18,6 +22,16 @@ class Dropout:
         self.mask = None   # mask for backprop
 
     def forward(self, x, training=True):
+        """
+        Forward pass with inverted dropout.
+        
+        Args:
+            x: Input array
+            training: If True, apply dropout; if False, pass through
+            
+        Returns:
+            Output array, same shape as input
+        """
         if not training or self.p == 0:
             return x        # no dropout at test time
 
@@ -27,4 +41,13 @@ class Dropout:
         return x * self.mask
 
     def backward(self, dout):
+        """
+        Backward pass - apply mask to gradients.
+        
+        Args:
+            dout: Upstream gradient
+            
+        Returns:
+            Gradient with respect to input
+        """
         return dout * self.mask
