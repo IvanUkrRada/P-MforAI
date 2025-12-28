@@ -18,7 +18,7 @@ This repository contains the setup instructions, task breakdown, and environment
 
 - https://www.kaggle.com/competitions/cifar-10/data (Task 1)
 - https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz (Task 1)
-- https://arxiv.org/abs/1912.12142v1 (Task 2)
+- https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images (Task 2)
 
 ---
 ---
@@ -115,30 +115,41 @@ This repository contains the setup instructions, task breakdown, and environment
  - pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu130
 
 ---
+## Install data set from Kaggle
+ - Click on this link (https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images) and download the data sets "lung_colon_image_set"
+ - Once downloaded, unzip and drag all the sub folders (5) from the "lung_image_sets" (3 subfolders) and "colon_image_sets" (2 subfolders) folders into the "lungcolon" folder inside of "task2"
+ - They should look like this in the "lungcolon":
+    - colon_aca
+    - colon_n
+    - lung_aca
+    - lung_n
+    - lung_scc
+ - You should be done.
+---
 
 ## Environment for Task 2
 
 1. **Navigate to the project directory**
    
-   Ensure you are in the directory where the `cnntsk2.yml` file is located.
+   Ensure you are in the directory where the `task2.yml` file is located.
 
 3. **Create the Conda environment**
 
    ```
-    conda env create -f cnntsk2.yml
+    conda env create -f task2.yml
    ```
 
 3. **Activate the environment**
 
    ```
-   conda activate IN3063_Coursework_env_task1
+   conda activate IN3063_Coursework_env_task2
    ```
 
     Example looks like this in terminal:
 
    ```
-   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env_task1
-   (IN3063_Coursework_env_task1) ➜  P-MforAI git:(main) ✗
+   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env_task2
+   (IN3063_Coursework_env_task2) ➜  P-MforAI git:(main) ✗
    ```
    
 ### No changes on yml file.
@@ -146,7 +157,7 @@ This repository contains the setup instructions, task breakdown, and environment
 1. **Activate the environment and start running the model**
 
    ```
-   conda activate IN3063_Coursework_env_task1
+   conda activate IN3063_Coursework_env_task2
    ```
 
 ### Updating the Existing Conda Environment
@@ -161,14 +172,14 @@ This repository contains the setup instructions, task breakdown, and environment
 2. **Activate the existing environment**
 
    ```
-   conda activate IN3063_Coursework_env_task1
+   conda activate IN3063_Coursework_env_task2
    ```
 
 3. **Update the environment**
-   This compares your active environment with `cnntsk2.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
+   This compares your active environment with `task2.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
 
    ```
-   conda env update --file cnntsk2.yml --prune
+   conda env update --file task2.yml --prune
    ```
 
 ---
