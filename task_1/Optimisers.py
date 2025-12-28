@@ -1,16 +1,41 @@
 """
-Code for optimiser that I can import in neural network.
+Optimization algorithms for neural network training.
+
+Provides 2 gradient descent optimizers:
+- SGD: Stochastic Gradient Descent
+- SGDMomentum: SGD with momentum for accelerated convergence
 """
 import numpy as np
 
 class Optimizer:
+    """
+    Base class for optimization algorithms.
+    
+    All optimizers must implement the update() method to modify
+    network parameters based on computed gradients.
+    """
     def update(self, params: dict, grads: dict):
         raise NotImplementedError
 
+
 class SGD(Optimizer):
+    """
+    Stochastic Gradient Descent optimizer.
+    
+    Updates parameters using: θ = θ - η *dL
+    where η is the learning rate(lr) and ∇L is the gradient.
+    """
     def __init__(self, lr=0.01):
         self.lr = lr
+
     def update(self, params: dict, grads: dict):
+        """
+        Perform SGD parameter update.
+        
+        Args:
+            params: Dictionary of parameters
+            grads: Dictionary of gradients
+        """
         for k in params:
             if k.startswith("W"):
                 i = k[1:]
@@ -23,11 +48,27 @@ class SGD(Optimizer):
 
 class SGDMomentum(Optimizer):
     def __init__(self, lr=0.01, beta=0.9):
+        """
+        Initialize SGD with Momentum optimizer.
+        
+        Args:
+            lr: Learning rate (default: 0.01)
+            beta: Momentum coefficient, typically 0.9 (default: 0.9)
+        """
         self.lr = lr
         self.beta = beta
         self.v = {}
 
     def update(self, params: dict, grads: dict):
+        """
+        Perform momentum-based parameter update.
+        Accumulates exponentially weighted average of past gradients
+        to accelerate convergence and dampen oscillations.
+        
+        Args:
+            params: Dictionary of parameters
+            grads: Dictionary of gradients
+        """
         for k in params:
             if k.startswith("W"):
                 i = k[1:]

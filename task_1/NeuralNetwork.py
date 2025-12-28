@@ -1,36 +1,33 @@
-'''
-Docstring for task_1.NeuralNetwork
-What's expected?
+"""
+Fully parametrizable feedforward neural network for classification.
 
-e. Implement a fully parametrizable neural network class
-You should implement a fully-connected NN class where with number of hidden
-layers, units, activation functions can be changed. In addition, you can add dropout or
-regularizer (L1 or L2). Report the parameters used (update rule, learning rate, decay,
-epochs, batch size) and include the plots in your report.
-'''
+Supports configurable architecture, multiple activation functions,
+dropout regularization, and L1/L2 weight regularization.
+"""
 import numpy as np
 from activations.ReLU import ReLU
 from activations.Sigmoid import Sigmoid
-from activations.Softmax import Softmax
-from activations.SoftmaxCrossEntropy import SoftmaxCrossEntropy
+from activations.Softmax import Softmax, SoftmaxCrossEntropy
 from activations.Tanh import Tanh
 from activations.LeakyReLU import LeakyReLU
 from Dropout import Dropout
 
 class NeuralNetwork:
     """
-        Fully parametrizable Neural Network.
+        Fully parametrizable Neural Network for classification.
+        Structure for understanding (for model with 3 hidden_layers): 
+            Input data (3072) → (Input layer / First Hidden) (512, ReLU) → Hidden (256, ReLU) → 
+            Hidden (128, ReLU) → Output (10, Softmax)
         
-        Parameters:
-        - input_size: int (3072 for CIFAR-10 flattened)
-        - hidden_layers: list of ints → [64, 32] means two hidden layers with 64 and 32 units
-        - output_size: int (number of classes)
-        - activation: list → 'relu' or 'sigmoid' for all hidden layers (try with others if time for report),
-                        or list like ['relu', 'sigmoid', 'softmax'] to specify per layer 
-                        i.e. for 2nd last, last hidden layer and output layer
-        - dropout_rates: None or list of floats (0 to 1), same length as hidden_layers
-        - regularisation: float, either L1 or L2
-        - seed: for reproducibility. It makes it so that random are not so random.
+        Args:
+            input_size: Input feature dimension (e.g., 3072 for CIFAR-10)
+            hidden_layers: List of hidden layer sizes, e.g., [512, 256, 128]
+            output_size: Number of output classes
+            activations: List of activation names for hidden layers, e.g., ['relu', 'relu', 'relu']
+            dropout_rates: List of dropout rates per hidden layer, or None
+            regularisation: 'L1', 'L2', or None
+            reg_lambda: Regularization strength (default: 0.01)
+            seed: Random seed for reproducibility (default: 0)
     """
     def __init__(self, input_size: int, hidden_layers: list[int], output_size: int, 
                  activations: list[str], dropout_rates=None, regularisation=None, 
@@ -75,9 +72,8 @@ class NeuralNetwork:
         """
         Initialize weights and biases based on activation function.
         
-        - ReLU/LeakyReLU: He initialization
-        - Sigmoid/Tanh: Xavier/Glorot initialization
-        - Softmax: Xavier initialization
+        Uses He initialization for ReLU/LeakyReLU and Xavier/Glorot
+        initialization for Sigmoid/Tanh/output layer.
         """
         # Collection of dimensions of all layers.
         dims = [self.input_size] + self.hidden_layers + [self.output_size]
@@ -120,6 +116,15 @@ class NeuralNetwork:
 
 
     def get_activation(self, name):
+        """
+        Get activation function instance by name.
+        
+        Args:
+            name: Activation name ('relu', 'sigmoid', 'tanh', 'leaky_relu')
+            
+        Returns:
+            Activation function instance
+        """
         if name == "relu":
             return ReLU()
         elif name == "sigmoid":
@@ -135,6 +140,16 @@ class NeuralNetwork:
 
     
     def forward_pass(self, X, training=True):
+        """
+        Forward propagation through the network.
+        
+        Args:
+            X: Input data, shape (batch_size, input_size)
+            training: If True, apply dropout; if False, inference mode
+            
+        Returns:
+            Logits (if training) or probabilities (if not training)
+        """
         A = X   # A shape is now (32, 3072) i.e. (batch_size, features). Previously X.T caused a lot of shapes issues.
         self.cache = {"A0": A}  # A0 represents activation of input layer.
         self.activation_objects = {}
@@ -167,6 +182,16 @@ class NeuralNetwork:
         
 
     def backward_pass(self, X, y_true):
+        """
+        Backward propagation to compute gradients.
+        
+        Computes gradients for all weights and biases including
+        regularization terms if applicable.
+        
+        Args:
+            X: Input data, shape (batch_size, input_size)
+            y_true: One-hot encoded labels, shape (batch_size, output_size)
+        """
         m = X.shape[0]
 
         y_pred = self.cache[f"A{self.len_hidden_layers + 1}"]
@@ -221,9 +246,10 @@ class NeuralNetwork:
 
     def update_weights(self, lr):
         """
-        Docstring for update_weights: Updates weights. Called during training for every epoch.
+        Updates weights. Called during training for every epoch.
         
-        :param lr: Learning rate of the model.
+        Args:
+            lr: Learning rate of the model.
         """
         for i in range(1, self.len_hidden_layers + 2):
             self.W[i] -= lr * self.grads[f"dW{i}"]
@@ -231,6 +257,15 @@ class NeuralNetwork:
         
 
     def predict(self, X):
+        """
+        Make predictions on input data.
+        
+        Args:
+            X: Input data, shape (batch_size, input_size)
+            
+        Returns:
+            Predicted class labels, shape (batch_size,)
+        """
         output = self.forward_pass(X, training=False)
         predictions = np.argmax(output, axis=1)
         return predictions
@@ -240,6 +275,15 @@ class NeuralNetwork:
         """
         Compute cross-entropy loss using SoftmaxCrossEntropy.
         This is just for monitoring - doesn't affect training.
+        """
+        """
+        Compute total loss (cross-entropy + regularization).
+        
+        Args:
+            y_true: One-hot encoded labels
+            
+        Returns:
+            total_loss = entropy loss + regularisation loss
         """
         # Get the logits (pre-softmax activations) from output layer
         logits = self.cache[f"Z{self.len_hidden_layers + 1}"]
@@ -282,8 +326,28 @@ class NeuralNetwork:
 
 
     def train(self, X, y, X_val, y_val,
-              epochs=1, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
+              epochs=50, batch_size=64, lr=0.01, decay=0.0, optimizer=None):
         n = X.shape[0]
+        """
+        Train the neural network.
+        
+        Args:
+            X: Training data, shape (n_samples, input_size)
+            y: Training labels (one-hot), shape (n_samples, output_size)
+            X_val: Validation data
+            y_val: Validation labels (one-hot)
+            epochs: Number of training epochs (default: 1)
+            batch_size: Mini-batch size (default: 64)
+            lr: Learning rate (default: 0.01)
+            decay: Learning rate decay factor (default: 0.0)
+            optimizer: Optimizer instance (SGD, SGDMomentum), or None for vanilla SGD
+        Returns:
+            Dictionary containing training history:
+                - 'train_loss': List of training losses per epoch
+                - 'train_acc': List of training accuracies per epoch
+                - 'val_loss': List of validation losses per epoch
+                - 'val_acc': List of validation accuracies per epoch
+        """
 
         # Initialize history tracking
         history = {
@@ -305,12 +369,7 @@ class NeuralNetwork:
             epoch_loss = 0
             num_batches = 0
 
-            # Adding decaying learning rate if decay inputted as parameter.
-            
-            # Exponential decay used.
-            # curr_lr = lr - (lr ** epoch)
-
-            # Step Decay
+            # Adding decaying learning rate if decay inputted as parameter (Step decay used).
             curr_lr = lr - (1 + decay * epoch)
 
             for i in range(0, n, batch_size):
