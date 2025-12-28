@@ -122,7 +122,7 @@ This repository contains the setup instructions, task breakdown, and environment
    
    Ensure you are in the directory where the `cnntsk2.yml` file is located.
 
-3. **Create the Conda environment
+3. **Create the Conda environment**
 
    ```
     conda env create -f cnntsk2.yml
