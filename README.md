@@ -137,8 +137,8 @@ This repository contains the setup instructions, task breakdown, and environment
     Example looks like this in terminal:
 
    ```
-   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env_task1
-   (IN3063_Coursework_env_task1) ➜  P-MforAI git:(main) ✗
+   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env_task2
+   (IN3063_Coursework_env_task2) ➜  P-MforAI git:(main) ✗
    ```
    
 ### No changes on yml file.
