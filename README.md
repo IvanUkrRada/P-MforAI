@@ -119,6 +119,28 @@ This repository contains the setup instructions, task breakdown, and environment
    conda activate IN3063_Coursework_env
    ```
 
+### Updating the Existing Conda Environment
+
+1. **Pull the latest changes**
+   Ensure your local repository is up to date with GitHub:
+
+   ```
+   git pull
+   ```
+
+2. **Activate the existing environment**
+
+   ```
+   conda activate IN3063_Coursework_env
+   ```
+
+3. **Update the environment**
+   This compares your active environment with `cnntsk2.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
+
+   ```
+   conda env update --file cnntsk2.yml --prune
+   ```
+
 ---
    
 ## Collaborators
