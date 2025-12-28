@@ -94,9 +94,9 @@ This repository contains the setup instructions, task breakdown, and environment
 
 3. **Create the Conda environment
 
-```
- conda env create -f cnntsk2.yml
-```
+   ```
+    conda env create -f cnntsk2.yml
+   ```
 
 3. **Activate the environment**
 
