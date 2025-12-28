@@ -120,12 +120,12 @@ This repository contains the setup instructions, task breakdown, and environment
 
 1. **Navigate to the project directory**
    
-   Ensure you are in the directory where the `cnntsk2.yml` file is located.
+   Ensure you are in the directory where the `task2.yml` file is located.
 
 3. **Create the Conda environment**
 
    ```
-    conda env create -f cnntsk2.yml
+    conda env create -f task2.yml
    ```
 
 3. **Activate the environment**
@@ -146,7 +146,7 @@ This repository contains the setup instructions, task breakdown, and environment
 1. **Activate the environment and start running the model**
 
    ```
-   conda activate IN3063_Coursework_env_task1
+   conda activate IN3063_Coursework_env_task2
    ```
 
 ### Updating the Existing Conda Environment
@@ -161,14 +161,14 @@ This repository contains the setup instructions, task breakdown, and environment
 2. **Activate the existing environment**
 
    ```
-   conda activate IN3063_Coursework_env_task1
+   conda activate IN3063_Coursework_env_task2
    ```
 
 3. **Update the environment**
-   This compares your active environment with `cnntsk2.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
+   This compares your active environment with `task2.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
 
    ```
-   conda env update --file cnntsk2.yml --prune
+   conda env update --file task2.yml --prune
    ```
 
 ---
