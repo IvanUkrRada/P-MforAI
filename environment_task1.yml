@@ -1,4 +1,4 @@
-name: IN3063_Coursework_env
+name: IN3063_Coursework_env_task1
 channels:
   - conda-forge
   - defaults
@@ -9,4 +9,4 @@ dependencies:
   - matplotlib
   - scikit-learn
   - pip
-  - pytorch
+  - tensorflow  # Just for loading dataset for task 1.
