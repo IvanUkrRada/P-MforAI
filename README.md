@@ -14,8 +14,9 @@ This repository contains the setup instructions, task breakdown, and environment
 
 ## Dataset Used
 
-- https://www.kaggle.com/competitions/cifar-10/data
-- https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+- https://www.kaggle.com/competitions/cifar-10/data (Task 1)
+- https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz (Task 1)
+- https://arxiv.org/abs/1912.12142v1 (Task 2)
 
 ---
 
@@ -76,12 +77,6 @@ This repository contains the setup instructions, task breakdown, and environment
    ```
 
 ---
-
-## How to set-up GitHub Desktop
-
-Follow these tutorials, I recommend the second link.
-- https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/setting-up-github-desktop
-- https://www.youtube.com/watch?v=8Dd7KRpKeaE&t=88s
 
 ## Task-2
 
