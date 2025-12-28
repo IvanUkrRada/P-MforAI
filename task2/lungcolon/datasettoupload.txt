@@ -1,0 +1,2 @@
+for dataset download from https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images
+put 5 folders with images in this folder 
