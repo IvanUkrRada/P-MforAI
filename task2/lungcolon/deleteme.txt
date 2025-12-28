@@ -1,0 +1,2 @@
+This is here so that the lungcolon folder remains when zipping/unzipping.
+Delete this when dragging the folders here.
