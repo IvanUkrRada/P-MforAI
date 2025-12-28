@@ -20,7 +20,7 @@ This repository contains the setup instructions, task breakdown, and environment
 
 ---
 
-## Conda Environment
+## Conda Environment for Task 1
 
 ### Setting Up the Coursework Environment Locally
 
@@ -84,6 +84,43 @@ This repository contains the setup instructions, task breakdown, and environment
  # CUDA 13.0
  - pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu130
 
+---
+
+## Environment for Task 2
+
+1. **Navigate to the project directory**
+   
+   Ensure you are in the directory where the `cnntsk2.yml` file is located.
+
+3. **Create the Conda environment
+
+```
+ conda env create -f cnntsk2.yml
+```
+
+3. **Activate the environment**
+
+   ```
+   conda activate IN3063_Coursework_env
+   ```
+
+    Example looks like this in terminal:
+
+   ```
+   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env
+   (IN3063_Coursework_env) ➜  P-MforAI git:(main) ✗
+   ```
+   
+### No changes on yml file.
+
+1. **Activate the environment and start running the model**
+
+   ```
+   conda activate IN3063_Coursework_env
+   ```
+
+---
+   
 ## Collaborators
 
 - **Ivan Radavskyi** 
