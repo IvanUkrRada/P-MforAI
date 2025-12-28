@@ -131,7 +131,7 @@ This repository contains the setup instructions, task breakdown, and environment
 3. **Activate the environment**
 
    ```
-   conda activate IN3063_Coursework_env_task1
+   conda activate IN3063_Coursework_env_task2
    ```
 
     Example looks like this in terminal:
