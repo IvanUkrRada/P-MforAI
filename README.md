@@ -5,11 +5,13 @@
 This repository contains the setup instructions, task breakdown, and environment configuration for the coursework project. Follow the steps below to correctly configure the environment and keep it updated throughout development.
 
 ---
+---
 
 ## Tasks Breakdown
 
 - **Can be found in 'CW Description.pdf'**
 
+---
 ---
 
 ## Dataset Used
@@ -19,31 +21,33 @@ This repository contains the setup instructions, task breakdown, and environment
 - https://arxiv.org/abs/1912.12142v1 (Task 2)
 
 ---
+---
 
-## Conda Environment for Task 1
+# Conda Environment Setup
+## For Task 1:
 
 ### Setting Up the Coursework Environment Locally
 
 1. **Navigate to the project directory**
-   Ensure you are in the directory where the `environment.yml` file is located.
+   Ensure you are in the directory where the `environment_task1.yml` file is located.
 
 2. **Create the Conda environment (Assuming you have anaconda navigator installed)**
 
    ```
-   conda env create -f environment.yml
+   conda env create -f environment_task1.yml
    ```
 
 3. **Activate the environment**
 
    ```
-   conda activate IN3063_Coursework_env
+   conda activate IN3063_Coursework_env_task1
    ```
 
    Example looks like this in terminal:
 
    ```
-   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env
-   (IN3063_Coursework_env) ➜  P-MforAI git:(main) ✗
+   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env_task1
+   (IN3063_Coursework_env_task1) ➜  P-MforAI git:(main) ✗
    ```
 
 ### No changes on yml file.
@@ -51,7 +55,7 @@ This repository contains the setup instructions, task breakdown, and environment
 1. **Simply Activate the environment and start running the model**
 
    ```
-   conda activate IN3063_Coursework_env
+   conda activate IN3063_Coursework_env_task1_task1
    ```
 
 ### Updating the Existing Conda Environment
@@ -66,16 +70,42 @@ This repository contains the setup instructions, task breakdown, and environment
 2. **Activate the existing environment**
 
    ```
-   conda activate IN3063_Coursework_env
+   conda activate IN3063_Coursework_env_task1
    ```
 
 3. **Update the environment**
-   This compares your active environment with `environment.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
+   This compares your active environment with `environment_task1.yml`, installing missing packages and removing outdated ones ( -- prune is there to delete packages prev installed but not currently in the yml file ):
 
    ```
-   conda env update --file environment.yml --prune
+   conda env update --file environment_task1.yml --prune
    ```
 
+## Task 1: Running Testing.ipynb or any .ipynb file
+ 
+
+### Steps to Execute
+
+
+1. **Open `Testing.ipynb`** in VS Code or Jupyter Notebook
+
+
+2. **Select the kernel**
+  - Click **Select Kernel** (top-right corner)
+  - Choose **Python Environments**
+  - Select **IN3063_Coursework_env_task1**
+
+
+3. **Run the notebook**
+  - Execute cells using `Shift + Enter`
+  - **Note**: On first run, you may be prompted to install `ipykernel`. Click **Install** when prompted.
+
+
+4. **Verify setup**
+  - All cells should execute without errors
+  - Check that packages like `numpy`, `matplotlib`, and custom modules load correctly
+
+
+---
 ---
 
 ## Task-2
@@ -101,14 +131,14 @@ This repository contains the setup instructions, task breakdown, and environment
 3. **Activate the environment**
 
    ```
-   conda activate IN3063_Coursework_env
+   conda activate IN3063_Coursework_env_task1
    ```
 
     Example looks like this in terminal:
 
    ```
-   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env
-   (IN3063_Coursework_env) ➜  P-MforAI git:(main) ✗
+   (base) ➜  P-MforAI git:(main) ✗ conda activate IN3063_Coursework_env_task1
+   (IN3063_Coursework_env_task1) ➜  P-MforAI git:(main) ✗
    ```
    
 ### No changes on yml file.
@@ -116,7 +146,7 @@ This repository contains the setup instructions, task breakdown, and environment
 1. **Activate the environment and start running the model**
 
    ```
-   conda activate IN3063_Coursework_env
+   conda activate IN3063_Coursework_env_task1
    ```
 
 ### Updating the Existing Conda Environment
@@ -131,7 +161,7 @@ This repository contains the setup instructions, task breakdown, and environment
 2. **Activate the existing environment**
 
    ```
-   conda activate IN3063_Coursework_env
+   conda activate IN3063_Coursework_env_task1
    ```
 
 3. **Update the environment**
