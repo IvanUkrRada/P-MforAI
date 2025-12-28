@@ -149,6 +149,6 @@ This repository contains the setup instructions, task breakdown, and environment
 - **Sujit Bhatta**
 - **Wael Khafagi**
 - **Yaseen Mneimneih**
-- **R**
+- **MD Iftier Roshid**
 
 ---
